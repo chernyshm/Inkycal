@@ -213,23 +213,23 @@ class StocksV2(inkycal_module):
       # parsed_tickers.append(stockDayValueLine)
       # parsed_tickers.append(stockMonthValueLine)
 
-      parsed_tickers_colour.append("")
-      if currentGain < 0:
-        parsed_tickers_colour.append(stockCurrentValueLine)
-      else:
-        parsed_tickers_colour.append("")
-      if currentOpen > currentQuote:
-        parsed_tickers_colour.append(stockDayValueLine)
-      else:
-        parsed_tickers_colour.append("")
-      if firstQuote > currentQuote:
-        parsed_tickers_colour.append(stockMonthValueLine)
-      else:
-        parsed_tickers_colour.append("")
+      # parsed_tickers_colour.append("")
+      # if currentGain < 0:
+      #   parsed_tickers_colour.append(stockCurrentValueLine)
+      # else:
+      #   parsed_tickers_colour.append("")
+      # if currentOpen > currentQuote:
+      #   parsed_tickers_colour.append(stockDayValueLine)
+      # else:
+      #   parsed_tickers_colour.append("")
+      # if firstQuote > currentQuote:
+      #   parsed_tickers_colour.append(stockMonthValueLine)
+      # else:
+      #   parsed_tickers_colour.append("")
 
       if (_ < len(tickerCount)):
         parsed_tickers.append("")
-        parsed_tickers_colour.append("")
+        # parsed_tickers_colour.append("")
 
       logger.info(f'creating chart data...')
       chartData = stockHistory.reset_index()
@@ -250,10 +250,10 @@ class StocksV2(inkycal_module):
       logger.info(f'open chart ...{chartPath}')
       chartImage = Image.open(chartPath)
       
-      print(f"\nW x H: {chartImage.width} x {chartImage.height}")
+      # print(f"\nW x H: {chartImage.width} x {chartImage.height}")
       chartImage.thumbnail((im_width, im_height), Image.BICUBIC)
 
-      print(f"W x H: {chartImage.width} x {chartImage.height}")
+      # print(f"W x H: {chartImage.width} x {chartImage.height}")
       chartPasteX = im_width-(chartImage.width) + 10
       chartPasteY = line_height*5*_
       logger.info(f'pasting chart image with index {_} to...{chartPasteX} {chartPasteY}')
