@@ -34,9 +34,9 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-class Stocks(inkycal_module):
+class StocksV2(inkycal_module):
 
-  name = "Stocks - Displays stock market infos from Yahoo finance"
+  name = "StocksV2 - Displays stock market infos from Yahoo finance"
 
   # required parameters
   requires = {
@@ -133,7 +133,7 @@ class Stocks(inkycal_module):
         logger.warning(f"Failed to get '{ticker}' ticker info: {exceptionMessage}")
 
       try:
-        stockName = stockInfo['shortName']
+        stockName = stockInfo['symbol']
       except Exception:
         stockName = ticker
         logger.warning(f"Failed to get '{stockName}' ticker name! Using "
@@ -159,13 +159,22 @@ class Stocks(inkycal_module):
       stockHistory = yfTicker.history("30d")
       stockHistoryLen = len(stockHistory)
       logger.info(f'fetched {stockHistoryLen} datapoints ...')
+      # import pprint
+      # pprint.pprint(stockHistory)
+
+      lastQuote = (stockHistory.head(1)['Close'].iloc[0])
+      lastQuoteDate = stockHistory.head(1).index.date[0]
+
       previousQuote = (stockHistory.tail(2)['Close'].iloc[0])
       currentQuote = (stockHistory.tail(1)['Close'].iloc[0])
       currentHigh = (stockHistory.tail(1)['High'].iloc[0])
       currentLow = (stockHistory.tail(1)['Low'].iloc[0])
       currentOpen = (stockHistory.tail(1)['Open'].iloc[0])
+      currentDate = stockHistory.tail(1).index.date[0]
       currentGain = currentQuote-previousQuote
       currentGainPercentage = (1-currentQuote/previousQuote)*-100
+
+      currentToLastGainPercentage = (1-currentQuote/lastQuote)*-100
       firstQuote = stockHistory.tail(stockHistoryLen)['Close'].iloc[0]
       logger.info(f'firstQuote {firstQuote} ...')
       
@@ -173,7 +182,7 @@ class Stocks(inkycal_module):
         return "%0.*f" % (precision, number)
         
       def percentageStr(number):
-        return '({:+.2f}%)'.format(number)
+        return '{:+.2f}%'.format(number)
       
       def gainStr(precision, number):      
         return "%+.*f" % (precision, number)
@@ -193,10 +202,15 @@ class Stocks(inkycal_module):
       logger.info(stockCurrentValueLine)
       logger.info(stockDayValueLine)
       logger.info(stockMonthValueLine)
+
+      # Add to data to image
       parsed_tickers.append(stockNameLine)
-      parsed_tickers.append(stockCurrentValueLine)
-      parsed_tickers.append(stockDayValueLine)
-      parsed_tickers.append(stockMonthValueLine)
+      parsed_tickers.append(floatStr(precision, currentQuote)) # Current
+      parsed_tickers.append(percentageStr(currentGainPercentage)) # Daily %
+      parsed_tickers.append(f"{(currentDate-lastQuoteDate).days}d: {percentageStr(currentToLastGainPercentage)}") # Monthly %
+
+      # parsed_tickers.append(stockDayValueLine)
+      # parsed_tickers.append(stockMonthValueLine)
 
       parsed_tickers_colour.append("")
       if currentGain < 0:
@@ -222,8 +236,10 @@ class Stocks(inkycal_module):
       chartTimeData = chartData.loc[:,'Date']
 
       logger.info(f'creating chart plot...')
-      fig, ax = plt.subplots()  # Create a figure containing a single axes.
-      ax.plot(chartTimeData, chartCloseData, linewidth=8)  # Plot some data on the axes.
+      fig, ax = plt.subplots(figsize=(im_width/100, im_height/100))  # Create a figure containing a single axes.
+      plt.subplots_adjust(left=0.25, right=0.95, top=0.9)
+      plt.axis('off')
+      ax.plot(chartTimeData, chartCloseData, linewidth=4)  # Plot some data on the axes.
       ax.set_xticklabels([])
       ax.set_yticklabels([])
       chartPath = tmpPath+ticker+'.png'
@@ -233,16 +249,16 @@ class Stocks(inkycal_module):
       logger.info(f'chartSpace is...{im_width} {im_height}')
       logger.info(f'open chart ...{chartPath}')
       chartImage = Image.open(chartPath)
-      chartImage.thumbnail((im_width/4,line_height*4), Image.BICUBIC)
+      
+      print(f"\nW x H: {chartImage.width} x {chartImage.height}")
+      chartImage.thumbnail((im_width, im_height), Image.BICUBIC)
 
+      print(f"W x H: {chartImage.width} x {chartImage.height}")
       chartPasteX = im_width-(chartImage.width)
       chartPasteY = line_height*5*_
       logger.info(f'pasting chart image with index {_} to...{chartPasteX} {chartPasteY}')
 
-      if firstQuote > currentQuote:
-        chartSpace_colour.paste(chartImage, (chartPasteX, chartPasteY))
-      else:
-        chartSpace.paste(chartImage, (chartPasteX, chartPasteY))
+      chartSpace.paste(chartImage, (chartPasteX, chartPasteY))
 
     im_black.paste(chartSpace)
     im_colour.paste(chartSpace_colour)
