@@ -14,5 +14,6 @@ pyvenv.cfg
 # Output
 images/
 out/
+logs/inkycal.log
 
-logs/
+*.egg-info

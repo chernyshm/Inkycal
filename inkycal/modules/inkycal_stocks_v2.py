@@ -110,7 +110,7 @@ class StocksV2(inkycal_module):
 
     # Calculate line_positions
     line_positions = [
-      (0, spacing_top + _ * line_height ) for _ in range(max_lines)]
+      (5, spacing_top + _ * line_height ) for _ in range(max_lines)]
 
     logger.debug(f'line positions: {line_positions}')
 
@@ -163,18 +163,18 @@ class StocksV2(inkycal_module):
       # pprint.pprint(stockHistory)
 
       lastQuote = (stockHistory.head(1)['Close'].iloc[0])
-      lastQuoteDate = stockHistory.head(1).index.date[0]
+      prev14dQuote = (stockHistory.tail(14)['Close'].iloc[0])
 
       previousQuote = (stockHistory.tail(2)['Close'].iloc[0])
       currentQuote = (stockHistory.tail(1)['Close'].iloc[0])
       currentHigh = (stockHistory.tail(1)['High'].iloc[0])
       currentLow = (stockHistory.tail(1)['Low'].iloc[0])
       currentOpen = (stockHistory.tail(1)['Open'].iloc[0])
-      currentDate = stockHistory.tail(1).index.date[0]
       currentGain = currentQuote-previousQuote
+      
       currentGainPercentage = (1-currentQuote/previousQuote)*-100
-
       currentToLastGainPercentage = (1-currentQuote/lastQuote)*-100
+      prev14dGainPercentage = (1-currentQuote/prev14dQuote)*-100
       firstQuote = stockHistory.tail(stockHistoryLen)['Close'].iloc[0]
       logger.info(f'firstQuote {firstQuote} ...')
       
@@ -206,8 +206,9 @@ class StocksV2(inkycal_module):
       # Add to data to image
       parsed_tickers.append(stockNameLine)
       parsed_tickers.append(floatStr(precision, currentQuote)) # Current
-      parsed_tickers.append(percentageStr(currentGainPercentage)) # Daily %
-      parsed_tickers.append(f"{(currentDate-lastQuoteDate).days}d: {percentageStr(currentToLastGainPercentage)}") # Monthly %
+      parsed_tickers.append(f"  1d: {percentageStr(currentGainPercentage)}") # Daily %
+      parsed_tickers.append(f"14d: {percentageStr(prev14dGainPercentage)}") # Daily %
+      parsed_tickers.append(f"30d: {percentageStr(currentToLastGainPercentage)}") # Monthly %
 
       # parsed_tickers.append(stockDayValueLine)
       # parsed_tickers.append(stockMonthValueLine)
@@ -236,9 +237,8 @@ class StocksV2(inkycal_module):
       chartTimeData = chartData.loc[:,'Date']
 
       logger.info(f'creating chart plot...')
-      fig, ax = plt.subplots(figsize=(im_width/100, im_height/100))  # Create a figure containing a single axes.
-      plt.subplots_adjust(left=0.25, right=0.95, top=0.9)
-      plt.axis('off')
+      px = 1/plt.rcParams['figure.dpi']  # pixel in inches
+      fig, ax = plt.subplots(figsize=(im_width*0.9*px, im_height*px))  # Create a figure containing a single axes.
       ax.plot(chartTimeData, chartCloseData, linewidth=4)  # Plot some data on the axes.
       ax.set_xticklabels([])
       ax.set_yticklabels([])
@@ -254,7 +254,7 @@ class StocksV2(inkycal_module):
       chartImage.thumbnail((im_width, im_height), Image.BICUBIC)
 
       print(f"W x H: {chartImage.width} x {chartImage.height}")
-      chartPasteX = im_width-(chartImage.width)
+      chartPasteX = im_width-(chartImage.width) + 10
       chartPasteY = line_height*5*_
       logger.info(f'pasting chart image with index {_} to...{chartPasteX} {chartPasteY}')
 
