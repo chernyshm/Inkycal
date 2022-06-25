@@ -239,7 +239,7 @@ class StocksV2(inkycal_module):
       logger.info(f'creating chart plot...')
       px = 1/plt.rcParams['figure.dpi']  # pixel in inches
       fig, ax = plt.subplots(figsize=(im_width*0.9*px, im_height*px))  # Create a figure containing a single axes.
-      ax.plot(chartTimeData, chartCloseData, linewidth=4)  # Plot some data on the axes.
+      ax.plot(chartTimeData, chartCloseData, linewidth=1)  # Plot some data on the axes.
       ax.set_xticklabels([])
       ax.set_yticklabels([])
       chartPath = tmpPath+ticker+'.png'
