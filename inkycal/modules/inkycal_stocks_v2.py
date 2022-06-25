@@ -98,7 +98,7 @@ class StocksV2(inkycal_module):
       raise Exception('Network could not be reached :/')
 
     # Set some parameters for formatting feeds
-    line_spacing = 1
+    line_spacing = 0
     line_height = self.font.getsize('hg')[1] + line_spacing
     line_width = im_width
     max_lines = (im_height // (self.font.getsize('hg')[1] + line_spacing))
@@ -106,7 +106,7 @@ class StocksV2(inkycal_module):
     logger.debug(f"max_lines: {max_lines}")
 
     # Calculate padding from top so the lines look centralised
-    spacing_top = int( im_height % line_height / 2 )
+    spacing_top = int( im_height % line_height / 2 ) + 10
 
     # Calculate line_positions
     line_positions = [
@@ -204,8 +204,8 @@ class StocksV2(inkycal_module):
       logger.info(stockMonthValueLine)
 
       # Add to data to image
-      parsed_tickers.append(stockNameLine)
-      parsed_tickers.append(floatStr(precision, currentQuote)) # Current
+      parsed_tickers.append(f"{stockName}")
+      parsed_tickers.append(f"{stockCurrency} {floatStr(precision, currentQuote)}") # Current
       parsed_tickers.append(f"  1d: {percentageStr(currentGainPercentage)}") # Daily %
       parsed_tickers.append(f"14d: {percentageStr(prev14dGainPercentage)}") # Daily %
       parsed_tickers.append(f"30d: {percentageStr(currentToLastGainPercentage)}") # Monthly %
