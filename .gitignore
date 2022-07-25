@@ -10,3 +10,11 @@ lib/
 share/
 lib64
 pyvenv.cfg
+
+# Output
+images/
+out/
+logs/
+logs/inkycal.log
+
+*.egg-info
